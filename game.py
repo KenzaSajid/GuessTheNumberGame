@@ -13,11 +13,11 @@ def get_valid_guess(min_value: int, max_value: int) -> int:
     while True:
         raw = input(f"Enter your guess ({min_value}-{max_value}): ").strip()
         if not raw:
-            print("Please type a number, not an empty answer.")
+            print("Invalid Input: Please type a number (no empty responses).")
             continue
 
         if not raw.isdigit():
-            print("That doesn't look like a whole number. Try again.")
+            print("Invalid entry:only whole numbers are allowed. Please try again.")
             continue
 
         guess = int(raw)
@@ -40,7 +40,7 @@ def play_round(min_value: int = 1, max_value: int = 100, max_attempts: int = 10)
     secret = random.randint(min_value, max_value)
     attempts_used = 0
 
-    print("\nI'm thinking of a number between "
+    print("\nThe game has started! I'm thinking of a number between "
           f"{min_value} and {max_value}.")
     print(f"You have {max_attempts} attempts to find it.\n")
 
