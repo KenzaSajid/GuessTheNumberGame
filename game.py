@@ -21,6 +21,11 @@ def get_valid_guess(min_value: int, max_value: int) -> int:
             continue
 
         guess = int(raw)
+        #New validation improvement:
+        if guess <0:
+            print( "Negative numbers are not allowed. Please enter a positive number.")
+            continue
+            
         if guess < min_value or guess > max_value:
             print(f"Your guess must be between {min_value} and {max_value}.")
             continue
