@@ -1,3 +1,4 @@
+#Minor update: added header comment for clarity
 import random
 
 
@@ -34,6 +35,7 @@ def play_round(min_value: int = 1, max_value: int = 100, max_attempts: int = 10)
     number of attempts to guess it. After each guess, the player is told
     whether the guess was too high or too low, and how many attempts remain.
     """
+    #Generate the secret number for this round
     secret = random.randint(min_value, max_value)
     attempts_used = 0
 
@@ -70,6 +72,7 @@ def ask_play_again() -> bool:
     Returns:
         bool: True if the player wants to play again, False otherwise.
     """
+    #Keep asking the user until they enter a valid yes/no answer
     while True:
         answer = input("Play again? (y/n): ").strip().lower()
         if answer in ("y", "yes"):
