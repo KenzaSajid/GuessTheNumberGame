@@ -98,7 +98,7 @@ def main() -> None:
             print("\nThanks for playing. Goodbye!")
             break
 
-
+    #Minor comment for second test commit    
 if __name__ == "__main__":
     main()
 
