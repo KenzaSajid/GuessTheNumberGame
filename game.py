@@ -1,115 +1,74 @@
 import random
 
 
-def ask_int(prompt: str, min_value: int | None = None, max_value: int | None = None) -> int:
+def get_valid_guess(min_value: int, max_value: int) -> int:
     """
-    Ask the user for an integer, repeating until a valid number is entered.
+    Ask the player for a guess and keep asking until they enter a valid integer.
 
-    Optionally enforces minimum and/or maximum allowed values.
+    Returns:
+        int: The player's guess between min_value and max_value (inclusive).
     """
     while True:
-        raw = input(prompt).strip()
-
-        # Check the input is an integer
-        try:
-            value = int(raw)
-        except ValueError:
-            print("Please enter a whole number.")
+        raw = input(f"Enter your guess ({min_value}-{max_value}): ").strip()
+        if not raw:
+            print("Please type a number, not an empty answer.")
             continue
 
-        # Enforce minimum and maximum if given
-        if min_value is not None and value < min_value:
-            print(f"Please enter a number at least {min_value}.")
+        if not raw.isdigit():
+            print("That doesn't look like a whole number. Try again.")
             continue
 
-        if max_value is not None and value > max_value:
-            print(f"Please enter a number at most {max_value}.")
+        guess = int(raw)
+        if guess < min_value or guess > max_value:
+            print(f"Your guess must be between {min_value} and {max_value}.")
             continue
 
-        return value
+        return guess
 
 
-def choose_difficulty() -> tuple[int, int, int, str]:
+def play_round(min_value: int = 1, max_value: int = 100, max_attempts: int = 10) -> None:
     """
-    Let the player choose a difficulty level.
+    Play a single round of the guessing game.
 
-    Returns:
-        (low, high, max_attempts, label)
-        where low/high define the secret number range,
-        max_attempts is how many guesses are allowed,
-        and label is the difficulty name.
+    The computer chooses a random number and the player has a limited
+    number of attempts to guess it. After each guess, the player is told
+    whether the guess was too high or too low, and how many attempts remain.
     """
-    print("\nChoose difficulty:")
-    print("  1. Easy   (1–10, 6 attempts)")
-    print("  2. Medium (1–50, 8 attempts)")
-    print("  3. Hard   (1–100, 10 attempts)")
-
-    choice = ask_int("Enter 1, 2 or 3: ", 1, 3)
-
-    if choice == 1:
-        return 1, 10, 6, "Easy"
-    elif choice == 2:
-        return 1, 50, 8, "Medium"
-    else:
-        return 1, 100, 10, "Hard"
-
-
-def play_single_game() -> tuple[bool, int, str]:
-    """
-    Play one full round of the game.
-
-    Returns:
-        won (bool): True if the player guessed correctly, otherwise False.
-        score (int): Points earned this round (0 if the player lost).
-        difficulty_label (str): The difficulty level used.
-    """
-    low, high, max_attempts, label = choose_difficulty()
-    secret = random.randint(low, high)
+    secret = random.randint(min_value, max_value)
     attempts_used = 0
 
-    print(f"\nI'm thinking of a number between {low} and {high}...")
-    print(f"You are playing on {label} mode.")
-    print(f"You have {max_attempts} attempts. Good luck!\n")
+    print("\nI'm thinking of a number between "
+          f"{min_value} and {max_value}.")
+    print(f"You have {max_attempts} attempts to find it.\n")
 
     while attempts_used < max_attempts:
-        guess = ask_int(
-            f"Attempt {attempts_used + 1}: your guess? ",
-            min_value=low,
-            max_value=high,
-        )
+        remaining = max_attempts - attempts_used
+        print(f"Attempt {attempts_used + 1} of {max_attempts} "
+              f"(you have {remaining} attempt(s) left).")
+
+        guess = get_valid_guess(min_value, max_value)
         attempts_used += 1
 
         if guess == secret:
-            print(f"🎉 Correct! The number was {secret}.")
-            print(f"You guessed it in {attempts_used} attempt(s).\n")
-
-            # Simple scoring: fewer attempts and larger ranges give higher scores
-            base_range = high - low + 1
-            score = base_range - attempts_used * 2
-            if score < 1:
-                score = 1
-            return True, score, label
-
-        # Give feedback
-        if guess < secret:
-            print("Too low.")
+            print(f"\n🎉 Correct! The number was {secret}.")
+            print(f"You found it in {attempts_used} attempt(s).\n")
+            return
+        elif guess < secret:
+            print("Too low!\n")
         else:
-            print("Too high.")
+            print("Too high!\n")
 
-        remaining = max_attempts - attempts_used
-        if remaining:
-            print(f"{remaining} attempt(s) remaining.\n")
-        else:
-            print(f"\nOut of attempts! The number was {secret}.")
-            return False, 0, label
+    # If we reach here, the player has run out of attempts
+    print("❌ You've used all your attempts.")
+    print(f"The correct number was {secret}.\n")
 
 
 def ask_play_again() -> bool:
     """
-    Ask the player whether they want to play another round.
+    Ask the player if they want to play another round.
 
     Returns:
-        True if they want to play again, False otherwise.
+        bool: True if the player wants to play again, False otherwise.
     """
     while True:
         answer = input("Play again? (y/n): ").strip().lower()
@@ -117,50 +76,25 @@ def ask_play_again() -> bool:
             return True
         if answer in ("n", "no"):
             return False
-        print("Please enter 'y' or 'n'.")
+        print("Please answer with 'y' or 'n'.")
 
 
 def main() -> None:
     """
     Entry point for the Guess the Number game.
 
-    Handles repeated rounds, basic statistics, and overall flow.
+    Repeats rounds until the player chooses to stop.
     """
-    print("===================================")
-    print("      Welcome to Guess the Number  ")
-    print("===================================\n")
-    print("Try to guess the secret number in as few attempts as possible.\n")
-
-    total_games = 0
-    total_score = 0
-    best_score: int | None = None
-    best_difficulty: str | None = None
+    print("🎲 Welcome to the Guess the Number Game! 🎲")
 
     while True:
-        won, score, difficulty_label = play_single_game()
-        total_games += 1
-        total_score += score
-
-        if won:
-            print(f"You earned {score} point(s) this round.")
-            if best_score is None or score > best_score:
-                best_score = score
-                best_difficulty = difficulty_label
-                print("New personal best score! 🎯")
-        else:
-            print("No points this round.")
-
-        # Show simple statistics after each game
-        print("\n--- Stats ---")
-        print(f"Games played: {total_games}")
-        print(f"Total score: {total_score}")
-        if best_score is not None:
-            print(f"Best round: {best_score} point(s) on {best_difficulty} mode")
+        play_round()
 
         if not ask_play_again():
-            print("\nThanks for playing! Goodbye.")
+            print("\nThanks for playing. Goodbye!")
             break
 
 
 if __name__ == "__main__":
     main()
+
