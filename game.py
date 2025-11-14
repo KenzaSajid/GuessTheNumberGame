@@ -65,7 +65,7 @@ def play_round(min_value: int = 1, max_value: int = 100, max_attempts: int = 10)
     print("❌ You've used all your attempts.")
     print(f"The correct number was {secret}.\n")
 
-
+#Minor clarity improvement: added note for future maintainers
 def ask_play_again() -> bool:
     """
     Ask the player if they want to play another round.
